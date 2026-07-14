@@ -1,0 +1,398 @@
+* {
+  box-sizing: border-box;
+}
+
+:root {
+  --bg: #060816;
+  --text: #f7f7fb;
+  --muted: #bfc6d4;
+  --accent: #8b5cf6;
+  --accent-2: #22d3ee;
+}
+
+body {
+  margin: 0;
+  font-family: 'Inter', sans-serif;
+  min-height: 100vh;
+  color: var(--text);
+  background:
+    radial-gradient(circle at top left, rgba(139, 92, 246, 0.35), transparent 30%),
+    linear-gradient(135deg, var(--bg), #111a31 70%);
+}
+
+.welcome-screen {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 2rem 2rem 5rem;
+}
+
+.welcome-card {
+  text-align: center;
+  max-width: 700px;
+  padding: 3rem;
+  border-radius: 24px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(10px);
+}
+
+.eyebrow {
+  margin: 0 0 0.5rem;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.3em;
+  color: var(--accent-2);
+}
+
+h1 {
+  margin: 0;
+  font-size: clamp(2.3rem, 4vw, 4rem);
+  line-height: 1.1;
+}
+
+.welcome-text {
+  margin-top: 1rem;
+  font-size: 1.1rem;
+  color: var(--muted);
+  line-height: 1.8;
+}
+
+.fun-text {
+  margin-top: 0.8rem;
+  color: var(--accent-2);
+  font-weight: 600;
+  opacity: 0.95;
+}
+
+.thumb {
+  display: block;
+  width: 180px;
+  max-width: 45%;
+  margin: 1.1rem auto 0;
+  border-radius: 12px;
+  border: 1px solid rgba(255,255,255,0.06);
+  box-shadow: 0 12px 30px rgba(0,0,0,0.35);
+  cursor: zoom-in;
+}
+
+.device-text {
+  margin-top: 0.45rem;
+  color: var(--muted);
+  font-size: 0.95rem;
+  text-align: center;
+}
+
+.actions-row {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  align-items: center;
+  margin-top: 0.9rem;
+}
+
+.icon-btn {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.06);
+  padding: 6px;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.icon-img {
+  width: 44px;
+  height: 44px;
+  display: block;
+  border-radius: 8px;
+  object-fit: cover;
+}
+
+.audio-player {
+  display: flex;
+  align-items: center;
+}
+
+.mini-panel-container {
+  position: fixed;
+  right: 1rem;
+  bottom: 1rem;
+  display: grid;
+  gap: 0;
+  align-items: end;
+  z-index: 80;
+}
+
+.mini-panel {
+  position: relative;
+  display: grid;
+  gap: 0.6rem;
+  min-width: 250px;
+  background: rgba(255,255,255,0.13);
+  border: 1px solid rgba(255,255,255,0.18);
+  border-radius: 28px;
+  padding: 0.85rem 0.95rem;
+  box-shadow: 0 18px 40px rgba(0,0,0,0.28);
+  backdrop-filter: blur(18px);
+}
+
+.tg-button {
+  position: absolute;
+  top: -70px;
+  right: 12px;
+  width: 56px;
+  height: 56px;
+  display: grid;
+  place-items: center;
+  border-radius: 18px;
+  background: linear-gradient(135deg, #22d3ee, #8b5cf6);
+  border: 1px solid rgba(255,255,255,0.28);
+  box-shadow: 0 18px 40px rgba(0,0,0,0.25);
+  z-index: 90;
+}
+
+.mini-player {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 0.65rem;
+}
+
+.mini-player-info {
+  display: flex;
+  flex-direction: column;
+  color: var(--text);
+}
+
+.mini-player-title {
+  font-weight: 700;
+  font-size: 0.95rem;
+  line-height: 1.1;
+}
+
+.mini-player-subtitle {
+  font-size: 0.78rem;
+  color: var(--muted);
+}
+
+.mini-player-buttons {
+  display: flex;
+  gap: 0.45rem;
+  margin-left: auto;
+  align-items: center;
+}
+
+.icon-btn.small {
+  width: 28px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  font-size: 0.8rem;
+  line-height: 1;
+  padding: 0;
+  color: #fff;
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.18);
+}
+
+.icon-btn.small.pause-btn {
+  width: 28px;
+  height: 28px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  transform: none;
+}
+
+.track-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 12px;
+  object-fit: cover;
+}
+
+.mini-icon-img {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  object-fit: cover;
+}
+
+.mini-slider {
+  display: grid;
+  gap: 0.55rem;
+}
+
+.mini-progress {
+  width: 100%;
+  height: 6px;
+  background: rgba(255,255,255,0.14);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.mini-progress-fill {
+  width: 85%;
+  height: 100%;
+  background: linear-gradient(90deg, #8b5cf6, #22d3ee);
+}
+
+.mini-time {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.75rem;
+  color: var(--muted);
+}
+
+@media (max-width: 520px) {
+  .mini-panel-container {
+    right: 0.75rem;
+    bottom: 0.75rem;
+  }
+
+  .mini-panel {
+    min-width: 210px;
+    padding: 0.75rem 0.85rem;
+    border-radius: 24px;
+  }
+
+  .tg-button {
+    top: -56px;
+    right: 8px;
+    width: 48px;
+    height: 48px;
+  }
+
+  .mini-player {
+    gap: 0.5rem;
+  }
+
+  .track-icon {
+    width: 30px;
+    height: 30px;
+  }
+
+  .mini-player-title {
+    font-size: 0.88rem;
+  }
+
+  .mini-player-buttons {
+    gap: 0.15rem;
+  }
+
+  .icon-btn.small {
+    width: 24px;
+    height: 24px;
+    font-size: 0.72rem;
+  }
+
+  .icon-btn.small.pause-btn {
+    width: 22px;
+    height: 22px;
+    font-size: 0.65rem;
+  }
+
+  .mini-slider {
+    gap: 0.4rem;
+  }
+
+  .mini-progress {
+    height: 5px;
+  }
+
+  .mini-time {
+    font-size: 0.68rem;
+  }
+
+  .welcome-screen {
+    padding-bottom: 8rem;
+  }
+
+  .birthday-card {
+    margin-bottom: 0.75rem;
+  }
+}
+
+.lightbox.hidden { display: none; }
+.lightbox {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-items: start center;
+  padding-top: 2rem;
+  background: rgba(0,0,0,0.55);
+  z-index: 60;
+}
+.lightbox-inner {
+  position: relative;
+  max-width: 38%;
+  max-height: 55%;
+}
+.lightbox-img {
+  max-width: 100%;
+  max-height: 100%;
+  border-radius: 8px;
+  display: block;
+}
+.lightbox-close {
+  position: absolute;
+  top: -22px;
+  right: -22px;
+  width: 44px;
+  height: 44px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  padding: 0;
+}
+.close-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 6px;
+  object-fit: cover;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.35);
+}
+
+#confetti-canvas {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 50;
+}
+
+#snow-canvas {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.welcome-screen {
+  position: relative;
+  z-index: 10;
+}
+
+.welcome-card {
+  position: relative;
+  z-index: 20;
+}
+
+.birthday-card {
+  margin-top: 1.25rem;
+  display: flex;
+  justify-content: center;
+}
+
+.birthday-text {
+  background: rgba(255,255,255,0.03);
+  color: var(--muted);
+  padding: 0.6rem 1rem;
+  border-radius: 12px;
+  border: 1px solid rgba(255,255,255,0.06);
+  font-size: 0.98rem;
+}

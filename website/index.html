@@ -1,0 +1,70 @@
+﻿<!DOCTYPE html>
+<html lang="uk">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Олег</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="css/styles.css" />
+  </head>
+  <body>
+    <main class="welcome-screen">
+      <div class="welcome-card">
+        <p class="eyebrow">Привіт</p>
+        <h1>я — олег</h1>
+        <p class="welcome-text">
+          Люблю прості речі, гарний дизайн і спокійний стиль.
+        </p>
+        <p class="fun-text">в мене приблизно 2.5 друга ((</p>
+        <img id="thumb" class="thumb" src="photos/nout.png" alt="nout" />
+        <p class="device-text">Мій ноутбук — Toshiba C855 2GC, трохи старенький, але надійний.</p>
+
+      </div>
+
+      <div class="birthday-card">
+        <p class="birthday-text">Народився 8 Жовтня 2013</p>
+      </div>
+    </main>
+
+    <canvas id="snow-canvas" aria-hidden="true"></canvas>
+    <canvas id="confetti-canvas" aria-hidden="true"></canvas>
+
+    <div class="mini-panel-container">
+      <button id="tg-btn" class="icon-btn tg-button" aria-label="telegram">
+        <img src="photos/tg_logo.png" alt="telegram" class="mini-icon-img" />
+      </button>
+      <div class="mini-panel">
+        <div class="mini-player">
+          <img src="photos/undertale.png" alt="undertale" class="track-icon" />
+          <div class="mini-player-info">
+            <span class="mini-player-title">UNDERTALE-CORE</span>
+          </div>
+          <div class="mini-player-buttons">
+            <button class="icon-btn small" aria-label="play">▶</button>
+            <button class="icon-btn small pause-btn" aria-label="pause">⏸</button>
+          </div>
+        </div>
+        <div class="mini-slider">
+          <div class="mini-progress">
+            <div class="mini-progress-fill"></div>
+          </div>
+          <div class="mini-time">
+            <span>2:23 / 2:46</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Lightbox / fullscreen image -->
+    <div id="lightbox" class="lightbox hidden" aria-hidden="true">
+      <div class="lightbox-inner">
+        <button id="lightbox-close" class="lightbox-close" aria-label="закрити">×</button>
+        <img id="lightbox-img" src="" alt="full" class="lightbox-img" />
+      </div>
+    </div>
+
+    <script src="js/script.js"></script>
+  </body>
+</html>
