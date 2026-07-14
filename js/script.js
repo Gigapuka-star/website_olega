@@ -24,8 +24,8 @@ document.addEventListener('DOMContentLoaded', () => {
         this.x = Math.random() * w;
         this.y = Math.random() * h;
         this.radius = 3.5 + Math.random() * 6;
-        this.speedY = 1.4 + Math.random() * 3.2;
-        this.drift = -2 + Math.random() * 4;
+        this.speedY = 7.5 + Math.random() * 8.5;
+        this.drift = -6 + Math.random() * 12;
         this.alpha = 0.6 + Math.random() * 0.35;
       }
 
@@ -195,51 +195,116 @@ document.addEventListener('DOMContentLoaded', () => {
     lightboxClose.addEventListener('click', closeLightbox);
   }
 
-  // Audio player setup: try core-undertale then fallback to undertale
+  // Audio player setup: try photos track and play/pause controls
   const player = document.getElementById('player');
-  const audioToggle = document.getElementById('audio-toggle');
-  const audioIcon = document.getElementById('audio-icon');
+  const playButton = document.getElementById('play-btn');
+  const pauseButton = document.getElementById('pause-btn');
+  const progressFill = document.getElementById('progress-fill');
+  const timeText = document.getElementById('time-text');
+  const durationText = document.getElementById('duration-text');
+  const subtitle = document.querySelector('.mini-player-subtitle');
+
+  function formatTime(seconds) {
+    const mins = Math.floor(seconds / 60);
+    const secs = Math.floor(seconds % 60);
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+  }
 
   async function chooseAudio() {
-    const candidates = ['audio/core-undertale.mp3', 'audio/undertale.mp3'];
-    for (const src of candidates) {
-      try {
-        const res = await fetch(src, { method: 'HEAD' });
-        if (res.ok) return src;
-      } catch (e) {
-        // ignore fetch errors
-      }
+    const src = 'photos/northernlight.ogg';
+    try {
+      const res = await fetch(src, { method: 'HEAD' });
+      if (res.ok) return src;
+    } catch (e) {
+      // ignore fetch errors
     }
     return null;
   }
 
-  chooseAudio().then((src) => {
-    if (!src) return; // no audio available
-    player.src = src;
-  });
+  function updateTimeDisplay() {
+    if (!player.duration || Number.isNaN(player.duration)) return;
+    timeText.textContent = formatTime(player.currentTime);
+    durationText.textContent = formatTime(player.duration);
+    const percent = player.currentTime / player.duration;
+    progressFill.style.width = `${Math.min(Math.max(percent, 0), 1) * 100}%`;
+  }
 
-  let playing = false;
-  if (audioToggle) {
-    audioToggle.addEventListener('click', () => {
-      if (!player.src) return; // nothing loaded
-      if (!playing) {
-        player.play();
-        playing = true;
-        audioToggle.title = 'Pause';
-        audioIcon.style.transform = 'scale(1.03)';
-      } else {
-        player.pause();
-        playing = false;
-        audioToggle.title = 'Play';
-        audioIcon.style.transform = '';
+  function setPlayerState(loaded) {
+    const ready = loaded && player.readyState >= 2;
+    if (playButton) playButton.disabled = !ready;
+    if (pauseButton) pauseButton.disabled = !ready;
+    if (subtitle) subtitle.textContent = ready ? 'готово до відтворення' : 'Toby fox';
+  }
+
+  if (player) {
+    chooseAudio().then((src) => {
+      if (!src) {
+        if (subtitle) subtitle.textContent = 'аудіо не знайдено';
+        setPlayerState(false);
+        return;
       }
+      player.src = src;
+      player.load();
     });
 
+    player.addEventListener('loadedmetadata', () => {
+      setPlayerState(true);
+      durationText.textContent = formatTime(player.duration);
+      updateTimeDisplay();
+    });
+
+    player.addEventListener('timeupdate', updateTimeDisplay);
     player.addEventListener('ended', () => {
-      playing = false;
-      audioIcon.style.transform = '';
+      progressFill.style.width = '100%';
+      isPlaying = false;
+      if (subtitle) subtitle.textContent = 'пісня завершена';
+      updateButtons();
     });
   }
+
+  let isPlaying = false;
+
+  function updateButtons() {
+    if (!playButton || !pauseButton) return;
+    playButton.classList.toggle('active', isPlaying);
+    pauseButton.classList.toggle('active', !isPlaying);
+  }
+
+  if (playButton) {
+    playButton.addEventListener('click', () => {
+      if (!player || !player.src) return;
+      player.play();
+      isPlaying = true;
+      if (subtitle) subtitle.textContent = 'відтворюється';
+      updateButtons();
+    });
+  }
+
+  if (pauseButton) {
+    pauseButton.addEventListener('click', () => {
+      if (!player || !player.src) return;
+      player.pause();
+      isPlaying = false;
+      if (subtitle) subtitle.textContent = 'пауза';
+      updateButtons();
+    });
+  }
+
+  if (progressFill && player) {
+    const progressContainer = progressFill.parentElement;
+    if (progressContainer) {
+      progressContainer.addEventListener('click', (event) => {
+        if (!player.duration) return;
+        const rect = progressContainer.getBoundingClientRect();
+        const clickX = event.clientX - rect.left;
+        const percent = clickX / rect.width;
+        player.currentTime = percent * player.duration;
+        updateTimeDisplay();
+      });
+    }
+  }
+
+  setPlayerState(false);
 
   if (lightbox) {
     lightbox.addEventListener('click', (e) => {

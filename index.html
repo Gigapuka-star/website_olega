@@ -36,22 +36,25 @@
         <img src="photos/tg_logo.png" alt="telegram" class="mini-icon-img" />
       </button>
       <div class="mini-panel">
+        <audio id="player" preload="metadata" aria-hidden="true"></audio>
         <div class="mini-player">
-          <img src="photos/undertale.png" alt="undertale" class="track-icon" />
+          <img src="photos/undertale.png" alt="Deltarune Northern Light" class="track-icon" />
           <div class="mini-player-info">
-            <span class="mini-player-title">UNDERTALE-CORE</span>
+            <span class="mini-player-title">DELTARUNE—Northern light</span>
+            <span class="mini-player-subtitle">Toby fox</span>
           </div>
           <div class="mini-player-buttons">
-            <button class="icon-btn small" aria-label="play">▶</button>
-            <button class="icon-btn small pause-btn" aria-label="pause">⏸</button>
+            <button id="play-btn" class="icon-btn small play-btn" aria-label="play">▶</button>
+            <button id="pause-btn" class="icon-btn small pause-btn" aria-label="pause" disabled>⏸</button>
           </div>
         </div>
         <div class="mini-slider">
           <div class="mini-progress">
-            <div class="mini-progress-fill"></div>
+            <div class="mini-progress-fill" id="progress-fill"></div>
           </div>
           <div class="mini-time">
-            <span>2:23 / 2:46</span>
+            <span id="time-text">0:10</span>
+            <span id="duration-text">0:11</span>
           </div>
         </div>
       </div>
