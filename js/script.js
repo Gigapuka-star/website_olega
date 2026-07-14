@@ -233,7 +233,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const ready = loaded && player.readyState >= 2;
     if (playButton) playButton.disabled = !ready;
     if (pauseButton) pauseButton.disabled = !ready;
-    if (subtitle) subtitle.textContent = ready ? 'Готово до відтворення' : 'Toby fox';
+    if (subtitle) subtitle.textContent = ready ? 'Готово до відтворення! :3' : 'Toby fox';
   }
 
   if (player) {
