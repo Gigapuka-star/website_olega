@@ -455,8 +455,8 @@ document.addEventListener('DOMContentLoaded', () => {
       const boardEl = document.getElementById('snake-board');
       const scoreEl = document.getElementById('snake-score');
 
-      const width = 12;
-      const height = 9;
+      const width = 10;
+      const height = 8;
       let snake = [
         {x: 4, y: 4},
         {x: 3, y: 4},
@@ -514,6 +514,7 @@ document.addEventListener('DOMContentLoaded', () => {
         ) {
           clearInterval(snakeInterval);
           snakeActive = false;
+          window.removeEventListener('keydown', handleKeys);
           boardEl.textContent = 'ГРУ ЗАВЕРШЕНО!\nВведіть snake для\nнової гри.';
           boardEl.style.color = '#fca5a5';
           return;
@@ -564,7 +565,7 @@ document.addEventListener('DOMContentLoaded', () => {
       });
 
       draw();
-      snakeInterval = setInterval(gameStep, 350);
+      snakeInterval = setInterval(gameStep, 450);
     }
 
     function stopSnakeGame() {
@@ -572,6 +573,7 @@ document.addEventListener('DOMContentLoaded', () => {
         clearInterval(snakeInterval);
         snakeInterval = null;
       }
+      window.removeEventListener('keydown', handleKeys);
       snakeActive = false;
     }
 
