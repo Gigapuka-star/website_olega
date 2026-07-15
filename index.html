@@ -1,9 +1,9 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="uk">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Олег</title>
+    <title>Олег — прості речі &amp; гарний дизайн</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
@@ -23,8 +23,29 @@
 
       </div>
 
+      <div class="terminal-card">
+        <div class="terminal-header">
+          <span class="terminal-circle red"></span>
+          <span class="terminal-circle yellow"></span>
+          <span class="terminal-circle green"></span>
+          <span class="terminal-title">oleg@toshiba: ~</span>
+        </div>
+        <div class="terminal-body" id="terminal-body">
+          <div class="terminal-line">Введіть 'help' для списку доступних команд.</div>
+        </div>
+        <form id="terminal-form" class="terminal-input-row">
+          <span class="terminal-prompt">oleg@toshiba:~$</span>
+          <input type="text" id="terminal-input" autocomplete="off" placeholder="Введіть команду..." />
+        </form>
+      </div>
+
       <div class="birthday-card">
         <p class="birthday-text">Народився 8 Жовтня 2013</p>
+      </div>
+
+      <div class="save-point-container">
+        <button id="save-point" class="save-point-btn" aria-label="Зберегтися">★</button>
+        <div id="save-toast" class="save-toast hidden"></div>
       </div>
     </main>
 

@@ -16,22 +16,92 @@ document.addEventListener('DOMContentLoaded', () => {
     window.addEventListener('resize', resizeSnow);
     resizeSnow();
 
+    const isMobile = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
     const snowParticles = [];
-    const SNOW_COUNT = 360;
+    const SNOW_COUNT = isMobile ? 300 : 700;
+
+    const mouse = { x: -1000, y: -1000, radius: 40 };
+
+    window.addEventListener('mousemove', (e) => {
+      mouse.x = e.clientX;
+      mouse.y = e.clientY;
+    });
+
+    window.addEventListener('touchmove', (e) => {
+      if (e.touches.length > 0) {
+        mouse.x = e.touches[0].clientX;
+        mouse.y = e.touches[0].clientY;
+      }
+    });
+
+    window.addEventListener('touchstart', (e) => {
+      if (e.touches.length > 0) {
+        mouse.x = e.touches[0].clientX;
+        mouse.y = e.touches[0].clientY;
+      }
+    });
+
+    window.addEventListener('mouseleave', () => {
+      mouse.x = -1000;
+      mouse.y = -1000;
+    });
+
+    window.addEventListener('touchend', () => {
+      mouse.x = -1000;
+      mouse.y = -1000;
+    });
+
+    // Pre-render a beautiful, soft round snowflake sprite to cache on the GPU
+    const snowflakeSprite = document.createElement('canvas');
+    snowflakeSprite.width = 16;
+    snowflakeSprite.height = 16;
+    const spriteCtx = snowflakeSprite.getContext('2d');
+    spriteCtx.beginPath();
+    const grad = spriteCtx.createRadialGradient(8, 8, 0, 8, 8, 8);
+    grad.addColorStop(0, 'rgba(255, 255, 255, 1)');
+    grad.addColorStop(0.7, 'rgba(255, 255, 255, 0.85)');
+    grad.addColorStop(1, 'rgba(255, 255, 255, 0)');
+    spriteCtx.fillStyle = grad;
+    spriteCtx.arc(8, 8, 8, 0, Math.PI * 2);
+    spriteCtx.fill();
 
     class Snow {
       constructor(w, h) {
         this.x = Math.random() * w;
         this.y = Math.random() * h;
-        this.radius = 3.5 + Math.random() * 6;
-        this.speedY = 7.5 + Math.random() * 8.5;
-        this.drift = -6 + Math.random() * 12;
-        this.alpha = 0.6 + Math.random() * 0.35;
+        this.size = 3.5 + Math.random() * 6.5;
+        if (isMobile) {
+          this.speedY = 1.8 + Math.random() * 2.5;
+          this.drift = -0.8 + Math.random() * 1.6;
+        } else {
+          this.speedY = 6.0 + Math.random() * 8.0;
+          this.drift = -3.0 + Math.random() * 6.0;
+        }
+        this.alpha = 0.5 + Math.random() * 0.45;
       }
 
       update(w, h) {
+        // Base movement
         this.x += this.drift;
         this.y += this.speedY;
+
+        // Interaction with mouse/touch cursor (Optimized distance check)
+        const dx = this.x - mouse.x;
+        const dy = this.y - mouse.y;
+        const distSq = dx * dx + dy * dy;
+        const radiusSq = mouse.radius * mouse.radius;
+
+        if (distSq < radiusSq) {
+          const dist = Math.sqrt(distSq);
+          if (dist > 0) {
+            const force = (mouse.radius - dist) / mouse.radius;
+            // dx / dist is cos(angle), dy / dist is sin(angle)
+            // This avoids heavy Math.atan2, Math.cos, and Math.sin calls!
+            this.x += (dx / dist) * force * 45.0;
+            this.y += (dy / dist) * force * 20.0;
+          }
+        }
+
         if (this.y > h + 10) {
           this.y = -10;
           this.x = Math.random() * w;
@@ -41,10 +111,15 @@ document.addEventListener('DOMContentLoaded', () => {
       }
 
       draw(ctx) {
-        ctx.beginPath();
-        ctx.fillStyle = 'rgba(255,255,255,' + this.alpha + ')';
-        ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-        ctx.fill();
+        // Drawing pre-rendered images (sprites) is extremely fast and hardware-accelerated
+        ctx.globalAlpha = this.alpha;
+        ctx.drawImage(
+          snowflakeSprite,
+          this.x - this.size / 2,
+          this.y - this.size / 2,
+          this.size,
+          this.size
+        );
       }
     }
 
@@ -60,6 +135,7 @@ document.addEventListener('DOMContentLoaded', () => {
         p.update(snowCanvas.width, snowCanvas.height);
         p.draw(snowCtx);
       }
+      snowCtx.globalAlpha = 1.0; // Reset alpha
       snowAnimId = requestAnimationFrame(snowLoop);
     }
 
@@ -313,5 +389,391 @@ document.addEventListener('DOMContentLoaded', () => {
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') closeLightbox();
     });
+  }
+
+  // Save Point logic
+  const savePoint = document.getElementById('save-point');
+  const saveToast = document.getElementById('save-toast');
+  if (savePoint && saveToast) {
+    let hideTimeout = null;
+    savePoint.addEventListener('click', () => {
+      let saves = parseInt(localStorage.getItem('save_count') || '0', 10);
+      saves += 1;
+      localStorage.setItem('save_count', saves.toString());
+
+      saveToast.innerHTML = `* Ви торкаєтеся теплого світла збереження. Прогрес вашої подорожі записано у файли браузера.<br><br>* Ви відчуваєте, як РІШУЧІСТЬ наповнює вашу душу.<br><br>* (Збереження #${saves} виконано!)`;
+      saveToast.classList.remove('hidden');
+
+      if (hideTimeout) clearTimeout(hideTimeout);
+      hideTimeout = setTimeout(() => {
+        saveToast.classList.add('hidden');
+      }, 4500);
+    });
+  }
+
+  // Terminal commands handling
+  const terminalInput = document.getElementById('terminal-input');
+  const terminalBody = document.getElementById('terminal-body');
+
+  let snakeActive = false;
+  let snakeInterval = null;
+
+  if (terminalInput && terminalBody) {
+    function startSnakeGame() {
+      if (snakeActive) return;
+      snakeActive = true;
+
+      // Clear terminal body
+      terminalBody.innerHTML = '';
+
+      // Create container
+      const container = document.createElement('div');
+      container.className = 'snake-game-container';
+      container.innerHTML = `
+        <div class="snake-stats">Рахунок: <span id="snake-score">0</span></div>
+        <div class="snake-board" id="snake-board"></div>
+        <div class="snake-controls">
+          <button class="snake-btn" data-dir="up">▲</button>
+          <div class="snake-row">
+            <button class="snake-btn" data-dir="left">◀</button>
+            <button class="snake-btn" data-dir="right">▶</button>
+          </div>
+          <button class="snake-btn" data-dir="down">▼</button>
+        </div>
+        <div style="font-size: 0.7rem; color: rgba(255,255,255,0.4); margin-top: 0.4rem; text-align: center; font-family: monospace;">
+          Керування: WASD / стрілочки.<br>Для виходу введіть будь-що в консоль.
+        </div>
+      `;
+      terminalBody.appendChild(container);
+
+      const boardEl = document.getElementById('snake-board');
+      const scoreEl = document.getElementById('snake-score');
+
+      const width = 12;
+      const height = 9;
+      let snake = [
+        {x: 4, y: 4},
+        {x: 3, y: 4},
+        {x: 2, y: 4}
+      ];
+      let direction = 'right';
+      let food = {x: 8, y: 4};
+      let score = 0;
+
+      function generateFood() {
+        while (true) {
+          const newFood = {
+            x: Math.floor(Math.random() * width),
+            y: Math.floor(Math.random() * height)
+          };
+          if (!snake.some(segment => segment.x === newFood.x && segment.y === newFood.y)) {
+            food = newFood;
+            break;
+          }
+        }
+      }
+
+      function draw() {
+        let boardStr = '';
+        for (let y = 0; y < height; y++) {
+          for (let x = 0; x < width; x++) {
+            if (snake[0].x === x && snake[0].y === y) {
+              boardStr += '▣';
+            } else if (snake.some((seg, idx) => idx > 0 && seg.x === x && seg.y === y)) {
+              boardStr += '■';
+            } else if (food.x === x && food.y === y) {
+              boardStr += '❤';
+            } else {
+              boardStr += '·';
+            }
+          }
+          if (y < height - 1) boardStr += '\n';
+        }
+        boardEl.textContent = boardStr;
+      }
+
+      function gameStep() {
+        let nextX = snake[0].x;
+        let nextY = snake[0].y;
+
+        if (direction === 'up') nextY--;
+        else if (direction === 'down') nextY++;
+        else if (direction === 'left') nextX--;
+        else if (direction === 'right') nextX++;
+
+        if (
+          nextX < 0 || nextX >= width ||
+          nextY < 0 || nextY >= height ||
+          snake.some(segment => segment.x === nextX && segment.y === nextY)
+        ) {
+          clearInterval(snakeInterval);
+          snakeActive = false;
+          boardEl.textContent = 'ГРУ ЗАВЕРШЕНО!\nВведіть snake для\nнової гри.';
+          boardEl.style.color = '#fca5a5';
+          return;
+        }
+
+        snake.unshift({x: nextX, y: nextY});
+
+        if (nextX === food.x && nextY === food.y) {
+          score += 10;
+          scoreEl.textContent = score;
+          generateFood();
+        } else {
+          snake.pop();
+        }
+
+        draw();
+      }
+
+      const handleKeys = (e) => {
+        if (!snakeActive) {
+          window.removeEventListener('keydown', handleKeys);
+          return;
+        }
+
+        const key = e.key.toLowerCase();
+        if ((key === 'w' || e.key === 'ArrowUp') && direction !== 'down') direction = 'up';
+        else if ((key === 's' || e.key === 'ArrowDown') && direction !== 'up') direction = 'down';
+        else if ((key === 'a' || e.key === 'ArrowLeft') && direction !== 'right') direction = 'left';
+        else if ((key === 'd' || e.key === 'ArrowRight') && direction !== 'left') direction = 'right';
+
+        if (['arrowup', 'arrowdown', 'arrowleft', 'arrowright', ' '].includes(e.key.toLowerCase())) {
+          e.preventDefault();
+        }
+      };
+
+      window.addEventListener('keydown', handleKeys);
+
+      const btns = container.querySelectorAll('.snake-btn');
+      btns.forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const newDir = btn.getAttribute('data-dir');
+          if (newDir === 'up' && direction !== 'down') direction = 'up';
+          if (newDir === 'down' && direction !== 'up') direction = 'down';
+          if (newDir === 'left' && direction !== 'right') direction = 'left';
+          if (newDir === 'right' && direction !== 'left') direction = 'right';
+        });
+      });
+
+      draw();
+      snakeInterval = setInterval(gameStep, 350);
+    }
+
+    function stopSnakeGame() {
+      if (snakeInterval) {
+        clearInterval(snakeInterval);
+        snakeInterval = null;
+      }
+      snakeActive = false;
+    }
+
+    const commands = {
+      help: () => `Доступні команди:
+  about    - про мене
+  specs    - деталі ноутбука Toshiba
+  friends  - інформація про друзів
+  snow     - увімкнути/вимкнути сніг
+  confetti - запустити конфеті
+  theme    - змінити колір сайту (theme [green/pink/blue/orange/default])
+  game     - гра камінь, ножиці, папір (game [rock/paper/scissors])
+  snake    - гра змійка прямо в консолі 🐍
+  ping     - перевірка зв'язку
+  secret   - відкрити таємницю
+  clear    - очистити екран`,
+      about: () => `я — олег
+Люблю прості речі, гарний дизайн і спокійний стиль.`,
+      specs: () => `      /\\         oleg@oleg
+     /  \\        ---------
+    /\\   \\       OS: Arch Linux x86_64
+   /      \\      Host: SATELLITE C855-2GC
+  /   ,,   \\     Kernel: 7.1.3-arch1-2
+ /   |  |   \\    DE: Xfce4 4.20
+/_-''    ''-_\\   CPU: Intel i3-3120M (4) @ 2.50 GHz
+                 GPU: AMD Radeon HD 6610M/7610M
+                 Memory: 7.70 GiB`,
+      friends: () => `Пошук друзів у базі даних...
+Знайдено: 2.5 друга.
+Деталі: 2 людини і 1 кіт (або 0.5 — це мій ноут, який завжди зі мною).`,
+      clear: () => {
+        terminalBody.innerHTML = '';
+        return null;
+      },
+      snow: () => {
+        const snowCanvas = document.getElementById('snow-canvas');
+        if (snowCanvas) {
+          const isHidden = window.getComputedStyle(snowCanvas).display === 'none';
+          if (isHidden) {
+            snowCanvas.style.display = 'block';
+            return 'Снігопад увімкнено! ❄️';
+          } else {
+            snowCanvas.style.display = 'none';
+            return 'Снігопад вимкнено! ☀️';
+          }
+        }
+        return 'Помилка: сніговий екран не знайдено.';
+      },
+      confetti: () => {
+        emit(120);
+        startLoopIfNeeded();
+        return 'Салют запущено! 🎉';
+      },
+      snake: () => {
+        startSnakeGame();
+        return null;
+      },
+      ping: () => `PING oleg (127.0.0.1) 56(84) bytes of data.
+64 bytes from 127.0.0.1: icmp_seq=1 ttl=64 time=0.032 ms
+64 bytes from 127.0.0.1: icmp_seq=2 ttl=64 time=0.045 ms
+--- oleg ping statistics ---
+2 packets transmitted, 2 received, 0% packet loss, time 1001ms`,
+      secret: () => {
+        const thumb = document.getElementById('thumb');
+        if (thumb) {
+          thumb.style.transition = 'transform 1s cubic-bezier(0.34, 1.56, 0.64, 1)';
+          thumb.style.transform = 'rotate(360deg)';
+          setTimeout(() => {
+            thumb.style.transform = '';
+          }, 1000);
+        }
+        return `Доступ дозволено! 🔓
+Таємне повідомлення:
+  .---.  .---.
+ /     \\/     \\
+ \\            /
+  \\   ❤      /
+   \\        /
+    \\      /
+     \\    /
+      \\  /
+       \\/
+Рішучість! (А також картинка ноутбука щойно прокрутилася)`;
+      }
+    };
+
+    const terminalForm = document.getElementById('terminal-form');
+    if (terminalForm) {
+      terminalForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const inputVal = terminalInput.value.trim();
+        terminalInput.value = '';
+
+        if (!inputVal) return;
+
+        if (snakeActive) {
+          stopSnakeGame();
+          terminalBody.innerHTML = '';
+        }
+
+        // Append entered command
+        const cmdLine = document.createElement('div');
+        cmdLine.className = 'terminal-line command-entered';
+        cmdLine.textContent = `oleg@toshiba:~$ ${inputVal}`;
+        terminalBody.appendChild(cmdLine);
+
+        // Process command
+        const lowerInput = inputVal.toLowerCase();
+        const parts = lowerInput.split(/\s+/);
+        const commandName = parts[0];
+
+        let response = '';
+        let isError = false;
+
+        if (commandName === 'sudo') {
+          response = 'oleg is not in the sudoers file. This incident will be reported.';
+        } else if (commandName === 'theme' || commandName === 'color') {
+          const arg = parts[1];
+          const themes = {
+            default: { accent: '#8b5cf6', accent2: '#22d3ee' },
+            green: { accent: '#15803d', accent2: '#22c55e' },
+            pink: { accent: '#db2777', accent2: '#f43f5e' },
+            blue: { accent: '#1d4ed8', accent2: '#3b82f6' },
+            orange: { accent: '#c2410c', accent2: '#f97316' }
+          };
+          if (!arg) {
+            response = `Введіть колір теми: default, green, pink, blue, orange. (Наприклад: theme pink)`;
+          } else if (themes[arg]) {
+            const root = document.documentElement;
+            root.style.setProperty('--accent', themes[arg].accent);
+            root.style.setProperty('--accent-2', themes[arg].accent2);
+            response = `Тему змінено на '${arg}'! ✨`;
+          } else {
+            response = `Невідома тема '${arg}'. Доступні: default, green, pink, blue, orange.`;
+            isError = true;
+          }
+        } else if (commandName === 'game') {
+          const choice = parts[1];
+          const validChoices = ['rock', 'paper', 'scissors', 'камінь', 'папір', 'ножиці'];
+          const choiceMap = {
+            'камінь': 'rock',
+            'папір': 'paper',
+            'ножиці': 'scissors',
+            'rock': 'rock',
+            'paper': 'paper',
+            'scissors': 'scissors'
+          };
+          if (!choice) {
+            response = `Гра "Камінь, ножиці, папір". Введіть:
+  game rock (або камінь)
+  game paper (або папір)
+  game scissors (або ножиці)`;
+          } else if (validChoices.includes(choice)) {
+            const playerMove = choiceMap[choice];
+            const moves = ['rock', 'paper', 'scissors'];
+            const botMove = moves[Math.floor(Math.random() * moves.length)];
+            
+            const moveNamesUk = {
+              rock: 'камінь ✊',
+              paper: 'папір ✋',
+              scissors: 'ножиці ✌'
+            };
+            
+            let result = '';
+            if (playerMove === botMove) {
+              result = 'Нічия! 🤝';
+            } else if (
+              (playerMove === 'rock' && botMove === 'scissors') ||
+              (playerMove === 'scissors' && botMove === 'paper') ||
+              (playerMove === 'paper' && botMove === 'rock')
+            ) {
+              result = 'Ви перемогли! 🎉';
+            } else {
+              result = 'Комп\'ютер переміг! 🤖';
+            }
+            response = `Ви обрали: ${moveNamesUk[playerMove]}
+Комп'ютер обрав: ${moveNamesUk[botMove]}
+Результат: ${result}`;
+          } else {
+            response = `Невідомий хід '${choice}'. Оберіть: rock, paper або scissors.`;
+            isError = true;
+          }
+        } else if (commands[lowerInput]) {
+          response = commands[lowerInput]();
+        } else {
+          response = `Команда '${inputVal}' не знайдена. Введіть 'help' для списку команд.`;
+          isError = true;
+        }
+
+        if (response !== null) {
+          const respLine = document.createElement('div');
+          respLine.className = `terminal-line ${isError ? 'error-response' : 'system-response'}`;
+          respLine.textContent = response;
+          terminalBody.appendChild(respLine);
+        }
+
+        // Scroll to bottom
+        terminalBody.scrollTop = terminalBody.scrollHeight;
+      });
+    }
+
+    // Focus terminal input on clicking anywhere in the terminal card
+    const terminalCard = document.querySelector('.terminal-card');
+    if (terminalCard) {
+      terminalCard.addEventListener('click', (e) => {
+        if (e.target.closest('.snake-btn')) return;
+        terminalInput.focus();
+      });
+    }
   }
 });

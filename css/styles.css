@@ -2,6 +2,22 @@
   box-sizing: border-box;
 }
 
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 10px;
+}
+::-webkit-scrollbar-track {
+  background: var(--bg);
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(139, 92, 246, 0.3);
+  border-radius: 999px;
+  border: 2px solid var(--bg);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(34, 211, 238, 0.5);
+}
+
 :root {
   --bg: #060816;
   --text: #f7f7fb;
@@ -36,6 +52,7 @@ body {
   border: 1px solid rgba(255, 255, 255, 0.12);
   box-shadow: 0 25px 60px rgba(0, 0, 0, 0.3);
   backdrop-filter: blur(10px);
+  zoom: 0.9;
 }
 
 .eyebrow {
@@ -50,6 +67,11 @@ h1 {
   margin: 0;
   font-size: clamp(2.3rem, 4vw, 4rem);
   line-height: 1.1;
+  background: linear-gradient(135deg, var(--text) 40%, var(--accent-2));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-weight: 800;
+  letter-spacing: -0.02em;
 }
 
 .welcome-text {
@@ -115,23 +137,31 @@ h1 {
 
 .mini-panel-container {
   position: fixed;
-  right: 1rem;
+  right: -0.5rem;
   bottom: 1rem;
   display: grid;
   gap: 0;
   align-items: end;
   z-index: 80;
+  zoom: 0.9;
 }
 
 .mini-panel {
   position: relative;
   display: grid;
-  gap: 0.75rem;
+  gap: 0.6rem;
   min-width: 280px;
-  max-width: 330px;
-  width: min(320px, calc(100vw - 1.25rem));
+  max-width: 400px;
+  width: min(400px, calc(100vw - 1rem));
+  padding: 0.85rem 1rem 0.85rem 1rem;
+  border-radius: 24px 0 0 24px;
+  background:
+    radial-gradient(circle at top left, rgba(139, 92, 246, 0.35), transparent 30%),
+    linear-gradient(135deg, rgba(6, 8, 22, 0.8), rgba(17, 26, 49, 0.8) 70%);
   box-shadow: 0 22px 45px rgba(0, 0, 0, 0.3);
   backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-right: none;
 }
 
 #player {
@@ -141,7 +171,7 @@ h1 {
 .tg-button {
   position: absolute;
   top: -70px;
-  right: -8px;
+  right: 20px;
   width: 56px;
   height: 56px;
   display: grid;
@@ -295,7 +325,7 @@ h1 {
 
   .tg-button {
     top: -56px;
-    right: 8px;
+    right: 28px;
     width: 48px;
     height: 48px;
   }
@@ -439,6 +469,7 @@ h1 {
   margin-top: 1.25rem;
   display: flex;
   justify-content: center;
+  zoom: 0.9;
 }
 
 .birthday-text {
@@ -449,3 +480,258 @@ h1 {
   border: 1px solid rgba(255,255,255,0.06);
   font-size: 0.98rem;
 }
+
+/* Terminal Card styling */
+.terminal-card {
+  width: 100%;
+  max-width: 700px;
+  margin-top: 1.5rem;
+  background: rgba(10, 12, 22, 0.75);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 18px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(12px);
+  overflow: hidden;
+  font-family: 'Courier New', Courier, monospace;
+  text-align: left;
+  zoom: 0.9;
+}
+
+.terminal-header {
+  background: rgba(255, 255, 255, 0.04);
+  padding: 0.65rem 1.1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.terminal-circle {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.terminal-circle.red { background: #ff5f56; }
+.terminal-circle.yellow { background: #ffbd2e; }
+.terminal-circle.green { background: #27c93f; }
+
+.terminal-title {
+  color: var(--muted);
+  font-size: 0.85rem;
+  margin-left: 0.5rem;
+  font-family: inherit;
+}
+
+.terminal-body {
+  padding: 1.1rem 1.25rem 0.5rem;
+  height: 200px;
+  overflow-y: auto;
+  font-size: 0.92rem;
+  color: #22d3ee;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  font-family: inherit;
+}
+
+.terminal-line {
+  line-height: 1.5;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+.terminal-line.command-entered {
+  color: var(--text);
+  font-weight: bold;
+}
+
+.terminal-line.system-response {
+  color: #bbf7d0;
+}
+
+.terminal-line.error-response {
+  color: #fca5a5;
+}
+
+.terminal-input-row {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.2rem 1.25rem 1.25rem;
+  font-family: inherit;
+}
+
+.terminal-prompt {
+  color: #8b5cf6;
+  font-weight: bold;
+  font-size: 0.92rem;
+  white-space: nowrap;
+}
+
+#terminal-input {
+  background: transparent;
+  border: none;
+  outline: none;
+  color: var(--text);
+  font-family: inherit;
+  font-size: 0.92rem;
+  flex: 1;
+  width: 100%;
+}
+
+#terminal-input::placeholder {
+  color: rgba(255, 255, 255, 0.2);
+}
+
+@media (max-width: 520px) {
+  .terminal-card {
+    max-width: 100%;
+    margin-top: 1rem;
+  }
+  .terminal-body {
+    height: 160px;
+    font-size: 0.85rem;
+    padding: 0.85rem 1rem 0.4rem;
+  }
+  .terminal-input-row {
+    padding: 0.1rem 1rem 1rem;
+  }
+  .terminal-prompt, #terminal-input {
+    font-size: 0.85rem;
+  }
+}
+
+/* Custom Cursor (Soul) - Native OS level rendering for zero lag */
+@media (pointer: fine) {
+  body {
+    cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32' width='24' height='24'%3E%3Cpath d='M16,28.2 C16,28.2 2,18.2 2,10.2 C2,5.2 6,1.2 11,1.2 C14,1.2 16,3.2 16,3.2 C16,3.2 18,1.2 21,1.2 C26,1.2 30,5.2 30,10.2 C30,18.2 16,28.2 16,28.2 Z' fill='%23ff0000'/%3E%3C/svg%3E") 12 12, auto !important;
+  }
+  
+  button, a, input, textarea, .thumb, .mini-panel-container, .save-point-btn, .snake-btn {
+    cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32' width='24' height='24'%3E%3Cpath d='M16,28.2 C16,28.2 2,18.2 2,10.2 C2,5.2 6,1.2 11,1.2 C14,1.2 16,3.2 16,3.2 C16,3.2 18,1.2 21,1.2 C26,1.2 30,5.2 30,10.2 C30,18.2 16,28.2 16,28.2 Z' fill='%23ffeb3b'/%3E%3C/svg%3E") 12 12, auto !important;
+  }
+}
+
+/* Save Point styles */
+.save-point-container {
+  margin-top: 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  zoom: 0.9;
+}
+
+.save-point-btn {
+  background: transparent;
+  border: none;
+  color: #ffeb3b;
+  font-size: 1.8rem;
+  animation: save-glow 1.5s infinite alternate ease-in-out;
+  padding: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@keyframes save-glow {
+  from {
+    transform: scale(0.9);
+    filter: drop-shadow(0 0 2px rgba(255, 235, 59, 0.5));
+  }
+  to {
+    transform: scale(1.15);
+    filter: drop-shadow(0 0 8px rgba(255, 235, 59, 1));
+  }
+}
+
+.save-toast {
+  position: absolute;
+  bottom: 3.5rem;
+  background: rgba(0, 0, 0, 0.92);
+  border: 2px solid #fff;
+  color: #fff;
+  font-family: 'Courier New', monospace;
+  padding: 0.8rem 1.2rem;
+  border-radius: 6px;
+  width: min(320px, calc(100vw - 2rem));
+  text-align: left;
+  font-size: 0.9rem;
+  line-height: 1.4;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+  z-index: 1000;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  white-space: normal;
+}
+
+.save-toast.hidden {
+  opacity: 0;
+  transform: translateY(10px);
+  pointer-events: none;
+}
+
+/* Snake Game inside Terminal styling */
+.snake-game-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: rgba(0, 0, 0, 0.5);
+  padding: 0.8rem;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  width: fit-content;
+  margin: 0.5rem auto;
+  font-family: 'Courier New', Courier, monospace;
+}
+
+.snake-stats {
+  font-weight: bold;
+  color: #ffeb3b;
+  margin-bottom: 0.4rem;
+  font-size: 0.95rem;
+}
+
+.snake-board {
+  font-size: 1.15rem;
+  line-height: 0.85;
+  color: #22c55e;
+  white-space: pre;
+  letter-spacing: 2px;
+  margin: 0.4rem 0;
+}
+
+.snake-controls {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  margin-top: 0.6rem;
+}
+
+.snake-row {
+  display: flex;
+  gap: 12px;
+}
+
+.snake-btn {
+  width: 36px;
+  height: 36px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  color: #fff;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 1.1rem;
+  padding: 0;
+}
+
+.snake-btn:active {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+
