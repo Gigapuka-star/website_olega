@@ -267,6 +267,12 @@ document.addEventListener('DOMContentLoaded', () => {
     tgBtn.addEventListener('click', () => openLightbox('photos/tg.jpg'));
   }
 
+  // discord button opens my_discord.jpg in lightbox
+  const dcBtn = document.getElementById('dc-btn');
+  if (dcBtn) {
+    dcBtn.addEventListener('click', () => openLightbox('photos/my_discord.jpg'));
+  }
+
   if (lightboxClose) {
     lightboxClose.addEventListener('click', closeLightbox);
   }

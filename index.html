@@ -53,9 +53,14 @@
     <canvas id="confetti-canvas" aria-hidden="true"></canvas>
 
     <div class="mini-panel-container">
-      <button id="tg-btn" class="icon-btn tg-button" aria-label="telegram">
-        <img src="photos/tg_logo.png" alt="telegram" class="mini-icon-img" />
-      </button>
+      <div class="panel-top-buttons">
+        <button id="dc-btn" class="icon-btn dc-button" aria-label="discord">
+          <img src="photos/discord-logo.jpg" alt="discord" class="mini-icon-img" />
+        </button>
+        <button id="tg-btn" class="icon-btn tg-button" aria-label="telegram">
+          <img src="photos/tg_logo.png" alt="telegram" class="mini-icon-img" />
+        </button>
+      </div>
       <div class="mini-panel">
         <audio id="player" preload="metadata" aria-hidden="true"></audio>
         <div class="mini-player">
@@ -86,6 +91,14 @@
       <div class="lightbox-inner">
         <button id="lightbox-close" class="lightbox-close" aria-label="закрити">×</button>
         <img id="lightbox-img" src="" alt="full" class="lightbox-img" />
+      </div>
+    </div>
+
+    <div id="achievement-toast" class="achievement-toast">
+      <div class="achievement-icon">🏆</div>
+      <div class="achievement-text">
+        <div class="achievement-title">Досягнення отримано!</div>
+        <div class="achievement-name" id="achievement-name">Назва ачівки</div>
       </div>
     </div>
 
