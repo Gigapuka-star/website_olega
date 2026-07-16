@@ -18,9 +18,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const isMobile = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
     const snowParticles = [];
-    const SNOW_COUNT = isMobile ? 300 : 700;
-
-    const mouse = { x: -1000, y: -1000, radius: 40 };
+    const SNOW_COUNT = isMobile ? 120 : 240;
+    const mouse = { x: -1000, y: -1000, radius: 60 };
 
     window.addEventListener('mousemove', (e) => {
       mouse.x = e.clientX;
@@ -51,67 +50,63 @@ document.addEventListener('DOMContentLoaded', () => {
       mouse.y = -1000;
     });
 
-    // Pre-render a beautiful, soft round snowflake sprite to cache on the GPU
+    // Pre-render a soft snowflake sprite to cache on the GPU
     const snowflakeSprite = document.createElement('canvas');
     snowflakeSprite.width = 16;
     snowflakeSprite.height = 16;
     const spriteCtx = snowflakeSprite.getContext('2d');
-    spriteCtx.beginPath();
     const grad = spriteCtx.createRadialGradient(8, 8, 0, 8, 8, 8);
     grad.addColorStop(0, 'rgba(255, 255, 255, 1)');
-    grad.addColorStop(0.7, 'rgba(255, 255, 255, 0.85)');
+    grad.addColorStop(0.55, 'rgba(255, 255, 255, 0.9)');
     grad.addColorStop(1, 'rgba(255, 255, 255, 0)');
     spriteCtx.fillStyle = grad;
+    spriteCtx.beginPath();
     spriteCtx.arc(8, 8, 8, 0, Math.PI * 2);
     spriteCtx.fill();
 
     class Snow {
       constructor(w, h) {
+        this.reset(w, h, true);
+      }
+
+      reset(w, h, startAbove = false) {
         this.x = Math.random() * w;
-        this.y = Math.random() * h;
-        this.size = 3.5 + Math.random() * 6.5;
-        if (isMobile) {
-          this.speedY = 1.8 + Math.random() * 2.5;
-          this.drift = -0.8 + Math.random() * 1.6;
-        } else {
-          this.speedY = 6.0 + Math.random() * 8.0;
-          this.drift = -3.0 + Math.random() * 6.0;
-        }
-        this.alpha = 0.5 + Math.random() * 0.45;
+        this.y = startAbove ? -(Math.random() * 60) : Math.random() * h;
+        this.size = 2.5 + Math.random() * 6.5;
+        this.speedY = (isMobile ? 0.8 : 1.2) + Math.random() * (isMobile ? 1.5 : 2.4);
+        this.windStrength = 0.4 + Math.random() * 0.8;
+        this.wave = Math.random() * Math.PI * 2;
+        this.waveSpeed = 0.005 + Math.random() * 0.01;
+        this.alpha = 0.35 + Math.random() * 0.55;
       }
 
       update(w, h) {
-        // Base movement
-        this.x += this.drift;
+        this.wave += this.waveSpeed;
+        this.x += Math.sin(this.wave) * this.windStrength;
         this.y += this.speedY;
 
-        // Interaction with mouse/touch cursor (Optimized distance check)
         const dx = this.x - mouse.x;
         const dy = this.y - mouse.y;
         const distSq = dx * dx + dy * dy;
         const radiusSq = mouse.radius * mouse.radius;
 
-        if (distSq < radiusSq) {
+        if (distSq < radiusSq && distSq > 0) {
           const dist = Math.sqrt(distSq);
-          if (dist > 0) {
-            const force = (mouse.radius - dist) / mouse.radius;
-            // dx / dist is cos(angle), dy / dist is sin(angle)
-            // This avoids heavy Math.atan2, Math.cos, and Math.sin calls!
-            this.x += (dx / dist) * force * 45.0;
-            this.y += (dy / dist) * force * 20.0;
-          }
+          const force = (mouse.radius - dist) / mouse.radius;
+          this.x += (dx / dist) * force * 18;
+          this.y += (dy / dist) * force * 12;
         }
 
-        if (this.y > h + 10) {
-          this.y = -10;
+        if (this.y > h + 12) {
+          this.reset(w, h, true);
           this.x = Math.random() * w;
+          this.y = -20 - Math.random() * 40;
         }
-        if (this.x < -10) this.x = w + 10;
-        if (this.x > w + 10) this.x = -10;
+        if (this.x < -20) this.x = w + 20;
+        if (this.x > w + 20) this.x = -20;
       }
 
       draw(ctx) {
-        // Drawing pre-rendered images (sprites) is extremely fast and hardware-accelerated
         ctx.globalAlpha = this.alpha;
         ctx.drawImage(
           snowflakeSprite,
@@ -125,17 +120,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function initSnow() {
       snowParticles.length = 0;
-      for (let i = 0; i < SNOW_COUNT; i++) snowParticles.push(new Snow(snowCanvas.width, snowCanvas.height));
+      for (let i = 0; i < SNOW_COUNT; i++) {
+        snowParticles.push(new Snow(snowCanvas.width, snowCanvas.height));
+      }
     }
 
     let snowAnimId = null;
     function snowLoop() {
       snowCtx.clearRect(0, 0, snowCanvas.width, snowCanvas.height);
-      for (let p of snowParticles) {
-        p.update(snowCanvas.width, snowCanvas.height);
-        p.draw(snowCtx);
+      for (let particle of snowParticles) {
+        particle.update(snowCanvas.width, snowCanvas.height);
+        particle.draw(snowCtx);
       }
-      snowCtx.globalAlpha = 1.0; // Reset alpha
+      snowCtx.globalAlpha = 1.0;
       snowAnimId = requestAnimationFrame(snowLoop);
     }
 
